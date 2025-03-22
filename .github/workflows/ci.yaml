@@ -24,3 +24,4 @@ jobs:
         runs: |
           # Directly run the DVC pipeline without pulling
           dvc repro
+          

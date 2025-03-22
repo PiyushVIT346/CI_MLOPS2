@@ -8,6 +8,36 @@ D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>myenv\Scripts\activate
 (myenv) D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>g
 it init
 (myenv) D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>git status
+(myenv) D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>g
+it add .
+(myenv) D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>git commit -m "Add cookiecutter"
+(myenv) D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>g
+it remote add origin https://github.com/PiyushVIT346/CI_MLOPS2.git
+(myenv) D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS>g
+it push origin master
+
+connect to dagshub
+go to the dagshub website. click on create button on top right corner. now create a new repo and connect github.
+now on dagshub click on remote option and than on experimwnt tab. now copy the code given and save on notepad. also click on mlflow ui button just above the given code in experimwnt tab. 
+
+in terminal,
+pip install mlflow
+pip install dagshub
+pip install seaborn
+
+go to  notebook folder and create a new file "dagshub_test.py" and paste the code copied and pasted on notepad.
+Now run code using command: python D:\projects\DVC project2\dvc+mlflow+ci2\CI_MLOPS\notebooks\dagshub_test.py
+open mlflow and check if log added.
+
+to start dvc
+write the command: dvc init
+to make storage for versioning enter the command: dvc remote add -d myremote C:\Users\HP\AppData\Local\Temp
+
+now add the code of data_collection.py, data_prep.py, model_building.py, model_eval.py, model_reg.py , dvc.yaml and params.yaml.
+now run code using command: dvc repro
+
+
+
 
 CI_MLOPS
 ==============================

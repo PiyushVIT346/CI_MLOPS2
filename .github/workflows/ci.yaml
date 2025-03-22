@@ -5,10 +5,10 @@ on: push
 jobs:
   project-testing:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -32,6 +32,7 @@ jobs:
           DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           python -m unittest tests/model_test.py
+          
       - name: Promote model to production
         if: success()
         env:

@@ -5,43 +5,25 @@ on: push
 jobs:
   project-testing:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Ensure a stable version
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip --no-cache-dir
-          pip install -r requirements.txt --no-cache-dir
-          pip install dvc dvc-s3 dvc-gdrive  # Install DVC + storage support
-
-      - name: Configure DVC remote
-        env:
-          DAGSHUB_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-        run: |
-          dvc remote modify origin auth basic
-          dvc remote modify origin user $DAGSHUB_USERNAME
-          dvc remote modify origin password $DAGSHUB_TOKEN
-
-      - name: Pull data from DVC remote
-        env:
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-        run: |
-          # Check if the DVC remote is set up and pull data
-          if dvc remote list | grep -q "origin"; then
-            dvc pull
-          else
-            echo "No DVC remote configured, skipping pull."
-          fi
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install dvc
           
       - name: Run DVC pipeline
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           dvc repro  # Run the pipeline
 
@@ -49,4 +31,10 @@ jobs:
         env:
           DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          python -m unittest discover -s tests -p "*.py"
+          python -m unittest tests/model_test.py
+      - name: Promote model to production
+        if: success()
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: python scripts/production.py
+

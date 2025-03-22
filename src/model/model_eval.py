@@ -39,7 +39,7 @@ dagshub_url="https://dagshub.com"
 repo_owner="PiyushVIT346"
 repo_name="CI_MLOPS2"
 mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
-mlflow.set_experiments("Final_model")
+mlflow.set_experiment("Final_model")
 
 
 

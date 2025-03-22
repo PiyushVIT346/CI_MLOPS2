@@ -16,21 +16,33 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install dvc
+          pip install --upgrade pip --no-cache-dir
+          pip install -r requirements.txt --no-cache-dir
+          pip install dvc --no-cache-dir
 
       - name: Run DVC pipeline
         env: 
-          DAGSHUB_TOKEN: ${{secrets.DAGSHUB_TOKEN}}
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          DVC_REMOTE_USER: ${{ secrets.DAGSHUB_TOKEN }}
+          DVC_REMOTE_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          # If required, pull data and models before running DVC repro
-          dvc pull || echo "No DVC remote configured, skipping pull."
+          # Authenticate DVC if needed
+          dvc remote modify origin --local auth basic
+          dvc remote modify origin --local user $DVC_REMOTE_USER
+          dvc remote modify origin --local password $DVC_REMOTE_PASSWORD
+
+          # Pull data and models only if remote is configured
+          if dvc remote list | grep -q "origin"; then
+            dvc pull
+          else
+            echo "No DVC remote configured, skipping pull."
+          fi
           
           # Run the pipeline
           dvc repro
+
       - name: Run model tests
         env:
-          DAGSHUB_TOKEN: ${{secrets.DAGSHUB_TOKEN}}
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          python -m unittest tests/model_test.py
+          python -m unittest discover -s tests -p "*.py"

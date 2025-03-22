@@ -5,6 +5,7 @@ on: push
 jobs:
   project-testing:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -12,34 +13,37 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Specify a stable version
+          python-version: '3.10'  # Ensure a stable version
 
       - name: Install dependencies
         run: |
           pip install --upgrade pip --no-cache-dir
           pip install -r requirements.txt --no-cache-dir
-          pip install dvc --no-cache-dir
+          pip install dvc dvc-s3 dvc-gdrive  # Install DVC + storage support
 
-      - name: Run DVC pipeline
-        env: 
+      - name: Configure DVC remote
+        env:
+          DAGSHUB_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
           DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-          DVC_REMOTE_USER: ${{ secrets.DAGSHUB_TOKEN }}
-          DVC_REMOTE_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          # Authenticate DVC if needed
-          dvc remote modify origin --local auth basic
-          dvc remote modify origin --local user $DVC_REMOTE_USER
-          dvc remote modify origin --local password $DVC_REMOTE_PASSWORD
+          dvc remote modify origin auth basic
+          dvc remote modify origin user $DAGSHUB_USERNAME
+          dvc remote modify origin password $DAGSHUB_TOKEN
 
-          # Pull data and models only if remote is configured
+      - name: Pull data from DVC remote
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          # Check if the DVC remote is set up and pull data
           if dvc remote list | grep -q "origin"; then
             dvc pull
           else
             echo "No DVC remote configured, skipping pull."
           fi
           
-          # Run the pipeline
-          dvc repro
+      - name: Run DVC pipeline
+        run: |
+          dvc repro  # Run the pipeline
 
       - name: Run model tests
         env:
